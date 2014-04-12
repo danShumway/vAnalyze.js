@@ -1,0 +1,16 @@
+{
+	"manifest_version" : 2,
+
+	"name": "vAnalyze.js",
+	"description": "description goes here.",
+	"version": "0.0.1",
+
+
+
+	"permissions": [],
+	"browser-action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html"
+	}
+
+}
