@@ -1,4 +1,4 @@
-var vAnalyze_base_constructor = function() {
+var vAnalyze_base = new (function() {
 
 
         this.infectionLog = new Array();
@@ -15,34 +15,49 @@ var vAnalyze_base_constructor = function() {
         this.infection = function(elementToInfect, infectionFrame){
             for (var property in elementToInfect)
             {
-                if(elementToInfect.hasOwnProperty(property))
-                 try {
+                try{ //Errors for dom objects.
+                if(elementToInfect.hasOwnProperty(property)) {
                     if (typeof elementToInfect[property] == "function") {
-                        var theFunction = elementToInfect[property].toString().split(";");
+
+                        //Convert function to string.  We use this to cull off some data.
+                        var theFunction = elementToInfect[property].toString();
+                        if(theFunction != undefined) //Check for errors. Weird things can happen with functions, so it pays to be safe.
+                            theFunction = theFunction.split(";");
                         //Don't worry about functions that are blank or native code.  This is a hacky way of doing this, but it appears to work.
-                        if(theFunction.length >= 2) {
+                        if(theFunction != undefined && theFunction.length >= 2) {
                             //Don't infect your own methods.
                             if(elementToInfect[property].vAnalyze_infected == undefined)
                             { 
                                 elementToInfect[property].vAnalyze_infected = 1; //Mark as infected.
                                 var functionInfecting = elementToInfect[property]; //Save a reference to the old function.
 
-                                //We're using the reference elementToInfect[property] to get around reference errors.  If we just said ourFunctionReference = new function()
-                                //it wouldn't replace the actual function, just our reference to it.
-                                //It's like dealing with pointers.
-                                elementToInfect[property] = function() { 
+                                /*
+                                **We're using the reference elementToInfect[property] to get around reference errors.  
+                                **If we just said ourFunctionReference = new function(), it wouldn't replace the actual function, just our reference to it.
+                                **It's like dealing with pointers.
+                                */
+
+                                //First we're going to make the new function to replace the old one..
+                                var newFunction = function() {
                                     //Here we should check in with our base of operations and run whatever code is requested.
                                     vAnalyze_base.callCount++;
 
                                     //Call the old method, but also pass in the arguments it should have.
                                     //And yes, we pass in *this*, because this will mean the correct context when the program is actually run.
                                     var args = Array.prototype.slice.call(arguments); //Convert parameters to an array.
-                                    arguments.callee.vAnalyze_oldCode.apply(this, args); //Call the original method.
+                                    return arguments.callee.vAnalyze_oldCode.apply(this, args); //Call the original method, and return the result.
                                 }
-
+                                //Insert any properties back onto the function.
+                                for(var v in elementToInfect[property]) {
+                                    newFunction[v] = elementToInfect[property][v];
+                                }
                                 //By the way, we do need to attach the old code.
-                                elementToInfect[property].vAnalyze_oldCode = functionInfecting;
+                                newFunction.vAnalyze_oldCode = functionInfecting;
 
+                                //And assign.
+                                elementToInfect[property] = newFunction;
+
+                                //Update internal tally of how many methods we've gotten.
                                 this.currentlyInfectedMethods++;
                             }
                         }
@@ -50,7 +65,10 @@ var vAnalyze_base_constructor = function() {
                         if(elementToInfect[property].vAnalyze_infected != this.infectionsRun)
                         {
                             if(elementToInfect[property].vAnalyze_infected == undefined)
+                            {
+                                //We use defineProperty to keep our addition from being enumerated on in existing code - we don't want to ruin anyone's for... in loops.
                                 Object.defineProperty(elementToInfect[property], "vAnalyze_infected", { value : this.infectionsRun, enumerable: false});
+                            }
                             else
                                 elementToInfect[property].vAnalyze_infected = this.infectionsRun;
                             //add it to the list to return.
@@ -63,10 +81,9 @@ var vAnalyze_base_constructor = function() {
                             //console.log("found duplicate on run: " + this.infectionsRun + " : " + property);
                         }                        
                     }
-                 }
-                catch(err) {
-                    console.log(err);
-                }  
+                }
+
+                } catch(err) { console.log(err); }//Tell us you found something, but go on.
             }
         }
 
@@ -81,7 +98,7 @@ var vAnalyze_base_constructor = function() {
             //Now we start again.
             this.toInfect.push(this.base);
             vAnalyze_base.vAnalyze_infected = this.infectionsRun;
-            vAnalyze_base_constructor.vAnalyze_infected = this.infectionsRun;
+            vAnalyze_base.vAnalyze_infected = this.infectionsRun;
             this.infectionLoop();
         }
 
@@ -108,6 +125,4 @@ var vAnalyze_base_constructor = function() {
                 this.startInfection(this.base);
             }
         }
-}
-
-var vAnalyze_base = new vAnalyze_base_constructor();
+})();
