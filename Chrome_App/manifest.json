@@ -1,15 +1,18 @@
 {
-	"manifest_version" : 2,
+    "manifest_version" : 2,
 
-	"name": "vAnalyze.js",
-	"description": "description goes here.",
-	"version": "0.0.1",
+    "name": "vAnalyze.js",
+    "description": "description goes here.",
+    "version": "0.0.1",
 
+    "background": {
+        "scripts": ["background.html"],
+        "persistent": false
+    },
 
-
-	"permissions": [],
-	"browser_action": {
-		"default_icon": "icon.png"
-	}
+    "permissions": [ "activeTab", "http://*/" ],
+        "browser_action": {
+            "default_icon": "icon.png"
+        }
 
 }
