@@ -16,6 +16,12 @@ var vAnalyze_base = new (function() {
         //Some more interesting stuff here.  Let's sort functions by whether or not they are unique.
         this.uniqueCount = {};
 
+        //Much more unique.  A tree/linked-list of what the call-stack looks like.
+        this.callStack = null; //What will be displayed.
+        this.building = null; //In the backend, this is what will be actively built, and will switch over at a certain point.
+        this.currentStackObject = this.callStack;
+        this.callStackItem = function(text, parent, prev, next) { this.functionRun = text; this.parent = parent; this.prev = prev; this.next = next; }
+
         //A method that infects all methods on 
         this.infection = function(elementToInfect, infectionFrame){
             for (var property in elementToInfect)
@@ -204,4 +210,7 @@ var vAnalyze_base = new (function() {
 
             return toReturn;
         }
+
+        //Returns a formatted call-stack/tree of the recorded function calls.
+
 })();
