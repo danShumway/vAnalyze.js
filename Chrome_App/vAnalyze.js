@@ -133,3 +133,5 @@ var vAnalyze_base = new (function() {
             }
         }
 })();
+
+console.log("Test");
