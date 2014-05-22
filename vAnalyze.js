@@ -10,8 +10,11 @@ var vAnalyze_base = new (function() {
         this.currentlyIteratedObjects = 0;
         this.callCount = 0;
         this.foundFunctions = [];
-        this.foundFunctionsText = [];
+        this.foundFunctionsText = []; //This is the only publicly facing array, and it's not that great.  Just use the methods below.
         this.lastCalled = null;
+
+        //Some more interesting stuff here.  Let's sort functions by whether or not they are unique.
+        this.uniqueCount = {};
 
         //A method that infects all methods on 
         this.infection = function(elementToInfect, infectionFrame){
@@ -69,8 +72,17 @@ var vAnalyze_base = new (function() {
                                 newFunction.vAnalyze_callCount = 0;
                                 newFunction.vAnalyze_averageRunTime = 0;
                                 newFunction.vAnalyze_infected = 1; //Mark as infected.
+                                
+                                //Add it to our databases.
                                 this.foundFunctions.push(newFunction);
                                 this.foundFunctionsText.push(newFunction.vAnalyze_oldCode.toString());
+                                //Is it a *new* function?
+                                if(!(functionInfecting.toString() in this.uniqueCount))
+                                {
+                                    //Add it.
+                                    this.uniqueCount[functionInfecting.toString()] = 1;
+                                } else { this.uniqueCount[functionInfecting.toString()] += 1; } //Increment it.
+
 
                                 //And assign.
                                 elementToInfect[property] = newFunction;
@@ -150,7 +162,7 @@ var vAnalyze_base = new (function() {
             var compareFunction = function(a, b){
                 if (a.vAnalyze_averageRunTime < b.vAnalyze_averageRunTime)
                     return 1;
-                else if (a.vAnalyze_averageRunTime > b.vAnalyze_averageRunTime))
+                else if (a.vAnalyze_averageRunTime > b.vAnalyze_averageRunTime)
                     return -1;
                 return 0;
             }
@@ -161,6 +173,35 @@ var vAnalyze_base = new (function() {
             {
                 toReturn.push(this.foundFunctions[i].vAnalyze_averageRunTime + ": " + this.foundFunctions[i].vAnalyze_oldCode.toString());
             }
+            return toReturn;
+        }
+
+        //Returns a sorted array of functions by the number of instances that were found.
+        this.sortFunctionsByNumberOfInstances = function()
+        {
+            toReturn = [];
+
+            //return array.
+            for (var f in this.uniqueCount)
+            {
+                toReturn.push(f);
+            }
+
+            //Sort function
+            var compareFunction = function(a, b) {
+                if(vAnalyze_base.uniqueCount[a] < vAnalyze_base.uniqueCount[b]) return 1;
+                else if (vAnalyze_base.uniqueCount[a] > vAnalyze_base.uniqueCount[b]) return -1;
+                else return 0;
+            }
+
+            toReturn.sort(compareFunction);
+
+            //Also, include the number of instances.
+            for(var i = 0; i < toReturn.length; i++)
+            {
+                toReturn[i] = this.uniqueCount[toReturn[i]] + ": " + toReturn[i];
+            }
+
             return toReturn;
         }
 })();
