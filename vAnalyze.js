@@ -1,6 +1,5 @@
 var vAnalyze_base = new (function() {
 
-
         this.infectionLog = new Array();
         this.toInfect = new Array();
         this.infectionsRun = 0;
@@ -10,6 +9,9 @@ var vAnalyze_base = new (function() {
         this.currentlyInfectedMethods = 0;
         this.currentlyIteratedObjects = 0;
         this.callCount = 0;
+        this.foundFunctions = [];
+        this.foundFunctionsText = [];
+        this.lastCalled = null;
 
         //A method that infects all methods on 
         this.infection = function(elementToInfect, infectionFrame){
@@ -28,7 +30,6 @@ var vAnalyze_base = new (function() {
                             //Don't infect your own methods.
                             if(elementToInfect[property].vAnalyze_infected == undefined)
                             { 
-                                elementToInfect[property].vAnalyze_infected = 1; //Mark as infected.
                                 var functionInfecting = elementToInfect[property]; //Save a reference to the old function.
 
                                 /*
@@ -41,6 +42,8 @@ var vAnalyze_base = new (function() {
                                 var newFunction = function() {
                                     //Here we should check in with our base of operations and run whatever code is requested.
                                     vAnalyze_base.callCount++;
+                                    vAnalyze_base.lastCalled = arguments.callee.vAnalyze_oldCode;
+                                    arguments.callee.vAnalyze_callCount += 1;
 
                                     //Call the old method, but also pass in the arguments it should have.
                                     //And yes, we pass in *this*, because this will mean the correct context when the program is actually run.
@@ -53,6 +56,10 @@ var vAnalyze_base = new (function() {
                                 }
                                 //By the way, we do need to attach the old code.
                                 newFunction.vAnalyze_oldCode = functionInfecting;
+                                newFunction.vAnalyze_callCount = 0;
+                                newFunction.vAnalyze_infected = 1; //Mark as infected.
+                                this.foundFunctions.push(newFunction);
+                                this.foundFunctionsText.push(newFunction.vAnalyze_oldCode.toString());
 
                                 //And assign.
                                 elementToInfect[property] = newFunction;
@@ -83,7 +90,7 @@ var vAnalyze_base = new (function() {
                     }
                 }
 
-                } catch(err) { console.log(err); }//Tell us you found something, but go on.
+                } catch(err) { /*console.log(err);*/ }//Tell us you found something, but go on.
             }
         }
 
