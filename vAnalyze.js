@@ -73,6 +73,12 @@ var vAnalyze_base = new (function() {
                                 for(var v in elementToInfect[property]) {
                                     newFunction[v] = elementToInfect[property][v];
                                 }
+                                
+                                //Update prototype (WARNING: this uses the now depreciated __proto__ - there aren't any great ways at them moment to get around this)
+                                //newFunction.__proto__ = elementToInfect[property].__proto__;
+                                //Object.setPrototypeOf(newFunction, functionInfecting.prototype);
+                                //ToDo: Fix this stuff.
+                                
                                 //By the way, we do need to attach the old code.
                                 newFunction.vAnalyze_oldCode = functionInfecting;
                                 newFunction.vAnalyze_callCount = 0;
