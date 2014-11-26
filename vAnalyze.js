@@ -98,6 +98,7 @@ var vAnalyze_base = new (function() {
 
                                 //And assign.
                                 elementToInfect[property] = newFunction;
+                                elementToInfect[property].prototype = newFunction.vAnalyze_oldCode.prototype;
 
                                 //Update internal tally of how many methods we've gotten.
                                 this.currentlyInfectedMethods++;
