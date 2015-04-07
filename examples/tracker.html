@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<!--vAnalyze.js script-->
+<script src="../index.js"></script>
+<script>
+
+	window.onload = function() {
+		var Entity = function() {
+			this.x = 0;
+			this.y = 0;
+		}
+
+		//I have a simualtion and I notice that ocasionally entities are added to it 2 at a time instead of 1 at a time.
+		var Simulation = (function() {
+			var entities = ([]).orphan(); //Infect private object.
+
+			//Register a watcher for the entities.length property.
+			//Whenever an infected method is run, this property will be checked for changes.
+			//If there are changes, the event we've specified will be fired off.
+			Simulation.ware('tracker').watch('length', entities, function(expected, recieved) {
+				if(recieved - expected > 1) {
+					console.log('someone created two objects in the same method');
+					//What you'd most likely put here is a pause for your program and then a stack trace, where you'd see that addEntityBroken was the function that had just finished running.
+				}
+			});
+
+			this.addEntity = function() {
+				entities.push(new Entity());
+			}
+
+			this.addEntityBroken = function() {
+				entities.push(new Entity());
+				entities.push(new Entity());
+			};
+
+		}).orphan(); //Infect Simulation (through orphan method).  This will be the scope of our infection.
+
+		//Your other logic and program structure would go here.
+		//Whenever *any* method called addEntity from anywhere in your program, the watcher will trigger.
+		var mySim = new Simulation();
+		for(var i = 0; i < 5; i++) {
+			mySim.addEntityBroken();
+		};
+	}
+</script>
+</head>
+<body>
+</body>
+</html>
