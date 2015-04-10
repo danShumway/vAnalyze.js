@@ -114,8 +114,8 @@ function property(host, property, template) {
 			name: property,
 			host: host,
 			//
-			get: function () { return null; },
-			set: function () { },
+			get: function () { return host[property]; },
+			set: function (value) { host[property] = value; },
 			watch: function() { },
 			//
 			history: [],
@@ -207,6 +207,7 @@ function wrapFunction(that) {
 	//ToDo: Set Constructor.
 	replacement.prototype = original.prototype;
 
+
 	//If this function was already distributed through code, we might accidentally infect/wrap it again.
 	//In that case, what we really want to do is update the function to be using the wrapper we already made.
 	Object.defineProperty(original, '__wrapper__', {value: replacement, enumerable:false });
@@ -235,6 +236,34 @@ function wrapFunction(that) {
 //----------------------------------------------------------------------------------
 
 /**
+* SearchObjects can specify stuff to look for.
+*/
+function search(searchObject) {
+	//By default, they return everything.
+	//Stuff is filtered out as we go.
+	var that = this.that,
+		toReturn = [];
+
+	for(var prop in this.properties) {
+		//Loop through search object and see if object applies.
+		//ToDo: filter these out into rules or something.
+		if( !searchObject ||
+			(!searchObject.name || prop === searchObject.name) &&
+			(!searchObject.value || this.properties[prop].get() === searchObject.value) ) {
+
+			toReturn.push(this.properties[prop]);
+		}
+
+		//If the property is infected, recurse.
+		if(this.properties[prop].get().__infection__) {
+			toReturn = toReturn.concat(search.call(this.properties[prop].get().__infection__, searchObject));
+		}
+	}
+
+	return toReturn;
+}
+
+/**
 * Builds and adds infection properties to an object.
 * 
 * @returns true or false based on whether or not the infection was successful.
@@ -246,8 +275,17 @@ function buildInfection(that, host, name) {
 
 
 	__infection__ = {
-		properties: {},
-		__ignore__: true
+		that: that, //Reference to infected object.
+		properties: { //ToDo: construct better properties wrapper.
+
+		},
+
+		//------Methods---------------
+		find: search,
+
+
+		//---------------------------
+		__ignore__: true //Infections can not be infected.
 
 	}
 
