@@ -5,7 +5,7 @@
      * @param template (optional) - object that specifies custom getter or setter.
      */
     function prop(property, template) {
-        var host = this,
+        var host = this.that,
             _property;
 
         //Make sure host is suitable.

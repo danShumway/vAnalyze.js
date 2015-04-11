@@ -66,7 +66,6 @@
                 return this.__infection__;
             }
 
-            console.log("----------s---------------")
             for (var p in this) {
                 if (!globalIgnore[p]) {
                     var properHost = this;
@@ -76,11 +75,9 @@
                     console.log(p);
                     properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
                     properHost[p].infect();
-                    properHost.infect.prop.call(properHost, p);
+                    properHost.infect().prop(p);//.prop.call(properHost, p);
                 }
             }
-
-            console.log("--------------e--------------")
 
             return this.__infection__;
         }

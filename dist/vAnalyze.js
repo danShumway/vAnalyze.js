@@ -71,7 +71,6 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
                 return this.__infection__;
             }
 
-            console.log("----------s---------------")
             for (var p in this) {
                 if (!globalIgnore[p]) {
                     var properHost = this;
@@ -81,11 +80,9 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
                     console.log(p);
                     properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
                     properHost[p].infect();
-                    properHost.infect.prop.call(properHost, p);
+                    properHost.infect().prop(p);//.prop.call(properHost, p);
                 }
             }
-
-            console.log("--------------e--------------")
 
             return this.__infection__;
         }
@@ -173,7 +170,7 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
      * @param template (optional) - object that specifies custom getter or setter.
      */
     function prop(property, template) {
-        var host = this,
+        var host = this.that,
             _property;
 
         //Make sure host is suitable.
