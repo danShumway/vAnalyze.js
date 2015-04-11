@@ -3,32 +3,34 @@
 
 <head>
 <!--vAnalyze.js script-->
-<script src="../index.js"></script>
+<script src="../../dist/vAnalyze.js"></script>
 <script>
 
 	window.onload = function() {
 
-		var Simulation = (function() {
+        window.parent = {};
+		parent.Simulation = function() {
 			var _x = 5, _y = 7;
 
-			var code = Simulation.infect.scope_wrap(['_x', '_y']);
-			console.log(code);
-			eval(code);
+			//var code = Simulation.infect.scope_wrap(['_x', '_y']);
+			//console.log(code);
+			//eval(code);
 
 			this.traceX = function() {
 				console.log(_x);
 				_x++;
-			}
+			};
 
 			this.subObject = {
 				canYouFindMe : 'a happy string'
 			}
 
-		}).orphan(); //Infect Simulation (through orphan method).  This will be the scope of our infection.
+		}; //Infect Simulation (through orphan method).  This will be the scope of our infection.
 
+        parent.infect();
 		//Your other logic and program structure would go here.
 		//Whenever *any* method called addEntity from anywhere in your program, the watcher will trigger.
-		var mySim = new Simulation();
+		var mySim = new parent.Simulation();
 		window.mySim = mySim;
 	}
 </script>
