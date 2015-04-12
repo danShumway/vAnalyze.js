@@ -35,10 +35,14 @@ module.exports = function(grunt) {
             }
         },
 
+        qunit: {
+            all: ['docs/tests/*.html']
+        },
+
         watch: {
             scripts: {
                 files: ['develop/*.js', 'develop/*/*.js'],
-                tasks: ['concat', 'uglify'],
+                tasks: ['build'],
                 options: {
                     spawn: false
                 }
@@ -51,9 +55,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('build', ['concat', 'uglify']);
+    grunt.registerTask('test', ['jshint', 'qunit']);
+    grunt.registerTask('full', ['test', 'build'/*, log*/]);
 };
