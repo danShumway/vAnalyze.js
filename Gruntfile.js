@@ -62,5 +62,5 @@ module.exports = function(grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('build', ['concat', 'uglify']);
     grunt.registerTask('test', ['jshint', 'qunit']);
-    grunt.registerTask('full', ['test', 'build'/*, log*/]);
+    grunt.registerTask('full', ['build', 'test' /*, log*/]); //ToDo: Logger function to show results of test, recompile some docs, etc...
 };

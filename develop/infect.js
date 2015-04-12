@@ -72,7 +72,6 @@
                     if (!this.hasOwnProperty(p)) {
                         properHost = getOrigin(this.__proto__, p);
                     }
-                    console.log(p);
                     properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
                     properHost[p].infect();
                     properHost.infect().prop(p);//.prop.call(properHost, p);
