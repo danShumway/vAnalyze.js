@@ -14,6 +14,15 @@
         return getOrigin(that.__proto__, property); //ToDo: double check that this isn't depreciated.
     }
 
+    Infection.prototype = infect;
+    function Infection(that, dummy) {
+        this.that = that; //Proper chaining.
+        this.dummy = dummy; //Is it a fake infection?
+
+
+        this.properties = {};
+        this.__ignore__ =  true;
+    }
 
     /**
      * Builds and adds infection properties to an object.
@@ -25,17 +34,7 @@
 
         if(!that) { return false; } //Base case.
 
-        __infection__ = {
-            that : that, //Reference to infected object.
-            properties: {}, //ToDo: construct better properties wrapper.
-            __ignore__ : true //Infections can not be infected.
-        };
-
-        __infection__.__proto__ = infect;
-
-        window.infect = infect;
-        //__infection__.prototype = Object.create(infect.__proto__); //Inherit from infect as prototype.
-        //__infection__.prototype.constructor = __infection__;
+        __infection__ = new Infection(that);
 
         //We use defineProperty to keep our addition from being enumerated on in existing code.
         Object.defineProperty(that, '__infection__', { value : __infection__, enumerable: false});
@@ -49,8 +48,6 @@
      * that should be a dead giveaway that the 'elsewhere' is a prototype of this object.
      * ToDo: This method should take an options object, not a set of parameters.
      *
-     * @param host = optional parameter of a reference to the owning object.
-     * @param name = optional name of this object in code.
      **/
     var globalIgnore = { //ToDo: this should be abstracted someplace better.
         toString : true
@@ -72,9 +69,9 @@
                     if (!this.hasOwnProperty(p)) {
                         properHost = getOrigin(this.__proto__, p);
                     }
-                    properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
-                    properHost[p].infect();
-                    properHost.infect().prop(p);//.prop.call(properHost, p);
+                   // properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
+                    properHost[p] = properHost[p].infect().wrap();
+                    properHost.infect().prop(p);
                 }
             }
 
@@ -82,7 +79,7 @@
         }
 
         //@Huh: this should fail silently.  Maybe return some sort of default infection object that doesn't do anything?
-        return null;
+        return new Infection(this, true);
     }
 
 

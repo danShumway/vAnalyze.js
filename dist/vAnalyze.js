@@ -19,6 +19,15 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
         return getOrigin(that.__proto__, property); //ToDo: double check that this isn't depreciated.
     }
 
+    Infection.prototype = infect;
+    function Infection(that, dummy) {
+        this.that = that; //Proper chaining.
+        this.dummy = dummy; //Is it a fake infection?
+
+
+        this.properties = {};
+        this.__ignore__ =  true;
+    }
 
     /**
      * Builds and adds infection properties to an object.
@@ -30,17 +39,7 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
 
         if(!that) { return false; } //Base case.
 
-        __infection__ = {
-            that : that, //Reference to infected object.
-            properties: {}, //ToDo: construct better properties wrapper.
-            __ignore__ : true //Infections can not be infected.
-        };
-
-        __infection__.__proto__ = infect;
-
-        window.infect = infect;
-        //__infection__.prototype = Object.create(infect.__proto__); //Inherit from infect as prototype.
-        //__infection__.prototype.constructor = __infection__;
+        __infection__ = new Infection(that);
 
         //We use defineProperty to keep our addition from being enumerated on in existing code.
         Object.defineProperty(that, '__infection__', { value : __infection__, enumerable: false});
@@ -54,8 +53,6 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
      * that should be a dead giveaway that the 'elsewhere' is a prototype of this object.
      * ToDo: This method should take an options object, not a set of parameters.
      *
-     * @param host = optional parameter of a reference to the owning object.
-     * @param name = optional name of this object in code.
      **/
     var globalIgnore = { //ToDo: this should be abstracted someplace better.
         toString : true
@@ -77,9 +74,9 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
                     if (!this.hasOwnProperty(p)) {
                         properHost = getOrigin(this.__proto__, p);
                     }
-                    properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
-                    properHost[p].infect();
-                    properHost.infect().prop(p);//.prop.call(properHost, p);
+                   // properHost[p] = properHost.infect.func(properHost[p]); //Will return original object if it's not a function.
+                    properHost[p] = properHost[p].infect().wrap();
+                    properHost.infect().prop(p);
                 }
             }
 
@@ -87,7 +84,7 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
         }
 
         //@Huh: this should fail silently.  Maybe return some sort of default infection object that doesn't do anything?
-        return null;
+        return new Infection(this, true);
     }
 
 
@@ -98,15 +95,22 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
 }());
 (function() {
 
-    function func(original) {
-        var replacement;
+    function wrap(/*original*/) {
 
-        //Non-functions can't be wrapped - don't wrap functions marked with ignore.
-        if(typeof original !== 'function' || original.__ignore__) { return original; }
+        //------------Can the function be wrapped?------------
+
+        //Infected lets us know if we're calling this on a host after a .infect() call or not.
+        var infected = (this.__proto__ === Object.infect),
+            original= infected ? this.that : this,//What the original infection will be.
+            replacement;
+
+        //Non-functions can't be wrapped - don't wrap functions marked with ignore - functions should be infected before wrap.
+        if(typeof original !== 'function' || original.__ignore__ || !infected) { return original; }
         //Already wrapped functions will return their wrappers;
         if(original.__wrapper__) { return original.__wrapper__; }
 
-        //Build function wrapper
+        //---------------Build function wrapper----------------
+
         replacement = function() {
             var args = Array.prototype.slice.call(arguments),
                 toReturn;
@@ -120,7 +124,7 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
 
             //Infect the returned value (in case we're in a factory).
             if(toReturn && toReturn.infect) {
-                toReturn = toReturn.infect.func(toReturn); //Will return original value if not a function.
+                toReturn = toReturn.infect.wrap(toReturn); //Will return original value if not a function.
                 toReturn.infect(undefined, undefined); //ToDo: think about whether or not anything ought to be passed in here.
             }
             //Infect this (in case we're in a Constructor).
@@ -134,9 +138,14 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
             return toReturn;
         };
 
-        //Set prototype correctly.
-        //ToDo: Set Constructor.
+        //-----------Attach original properties---------------------------
+
+        //Set both prototypes and constructors correctly.
         replacement.prototype = original.prototype;
+        replacement.__proto__ = original.__proto__;
+        //ToDo: Set Constructor.
+
+
         //Attach properties.
         for(var p in original) {
             if(original.hasOwnProperty(p)) {
@@ -155,12 +164,25 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
         //If this method has also been party to an infection.
         replacement.toString.__infection__ = original.toString.__infection__; //@Huh: is this necessary?
 
+        //-------------Define interfaces on __infection__--------------
+
+        //We leave the original's __infection__ on but make it point to the correct new host.
+        //So if something has that infection stored, the next time it calls any methods with it, it will have this.that set correctly.
+        //Even if the returned Wrapper is stored incorrectly, we can still get some use out of it.
+        replacement.__infection__ = this;
+        replacement.__infection__.that = replacement;
+
+        //Copy function methods into __infection__
+        for(var prop in Object.prototype.infect.func) {
+            replacement.__infection__[prop] = Object.prototype.infect.func[prop];
+        }
+
         //Return newly wrapped function.
         return replacement;
     }
 
-    Object.prototype.infect.__proto__.func = func;
-    Object.defineProperty(Object.prototype.infect.__proto__.func, '__ignore__', {value: true, enumerable:false });
+    Object.prototype.infect.__proto__.wrap = wrap;
+    Object.defineProperty(Object.prototype.infect.__proto__.wrap, '__ignore__', {value: true, enumerable:false });
 }());
 (function() {
 
@@ -247,3 +269,12 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
     Object.prototype.infect.__proto__.search = search;
     Object.defineProperty(Object.prototype.infect.__proto__.search, '__ignore__', {value: true, enumerable:false });
 })();
+(function() {
+
+    function ware() {
+        //If a ware is passed in, return its interface.
+        //Link that interface to whatever instance of a thing you're working with.
+    }
+
+    //Object.prototype.infect.__proto__.func.ware = ware;
+}());
