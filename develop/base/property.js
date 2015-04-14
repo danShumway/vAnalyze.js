@@ -38,8 +38,8 @@
     }
 
 
-    Object.prototype.infect.__proto__.prop = prop;
     //Object.prototype.infect.prototype.scope = scope;
+    Object.defineProperty(Object.prototype.infect.__proto__, 'prop', {value: prop, enumerable:false });
     Object.defineProperty(Object.prototype.infect.__proto__.prop, '__ignore__', {value: true, enumerable:false });
 
 }());

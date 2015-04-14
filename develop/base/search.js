@@ -35,6 +35,6 @@
 
 
     //---------------------Attach--------------------
-    Object.prototype.infect.__proto__.search = search;
+    Object.defineProperty(Object.prototype.infect.__proto__, 'search', {value: search, enumerable:false });
     Object.defineProperty(Object.prototype.infect.__proto__.search, '__ignore__', {value: true, enumerable:false });
 })();
