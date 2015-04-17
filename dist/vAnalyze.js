@@ -59,7 +59,7 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
     };
 
     function infect() {
-        if (!this.__ignore__) {
+        if (!this.__ignore__ && Object.isExtensible(this)) {
 
             if (!this.__infection__) {
                 buildInfection(this);
@@ -171,9 +171,9 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
         replacement.__infection__.original = original;
 
         //Copy function methods into __infection__
-        /*for(var prop in Object.prototype.infect.func) {
+        for(var prop in Object.prototype.infect.func) {
             replacement.__infection__[prop] = Object.prototype.infect.func[prop];
-        }*/
+        }
 
         //Return newly wrapped function.
         return replacement;
@@ -206,16 +206,15 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
             watch: function() { },
             //
             history: [],
-            onChange: function() { //ToDo: fill out.
-
-            }
+            onChange: function() {} //ToDO: should there be a default here?
         };
 
         if(template) {
 
             _property.get = template.get || _property.get;
             _property.set = template.set || _property.get;
-            _property.alias = template.id || _property.id;
+            _property.alias = template.alias || _property.alias; //ToDo: think about the implications of this.
+            _property.onChange = template.onChange || _property.onChange;
         }
 
         host.__infection__.properties[property] = _property;
@@ -274,5 +273,5 @@ Object.defineProperty(Boolean.prototype, '__ignore__', {value: true, enumerable:
         //Link that interface to whatever instance of a thing you're working with.
     }
 
-    //Object.prototype.infect.__proto__.func.ware = ware;
+    Object.defineProperty(Object.prototype.infect, 'func', {value: {}, enumerable: false});
 }());

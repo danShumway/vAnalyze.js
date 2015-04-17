@@ -63,3 +63,13 @@ QUnit.test("Primitives", function(assert) {
     attached = enumerable(bool);
     assert.equal(attached.length, 0, 'No enumerable properties attached to Boolean');
 });
+
+QUnit.test("Infection edge cases", function(assert) {
+    var obj = { a: 5}, obj2 = { a: 5 };
+    Object.seal(obj);
+    Object.preventExtensions(obj2);
+
+    //ToDo: What is expected response to these objects?
+    assert.ok(obj.infect(), "infect() does not crash on sealed objects");
+    assert.ok(obj2.infect(), "infect() does not crash on unextensible objects");
+});

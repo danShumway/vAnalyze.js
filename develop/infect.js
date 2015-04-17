@@ -54,7 +54,7 @@
     };
 
     function infect() {
-        if (!this.__ignore__) {
+        if (!this.__ignore__ && Object.isExtensible(this)) {
 
             if (!this.__infection__) {
                 buildInfection(this);

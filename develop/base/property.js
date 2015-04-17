@@ -22,16 +22,15 @@
             watch: function() { },
             //
             history: [],
-            onChange: function() { //ToDo: fill out.
-
-            }
+            onChange: function() {} //ToDO: should there be a default here?
         };
 
         if(template) {
 
             _property.get = template.get || _property.get;
             _property.set = template.set || _property.get;
-            _property.alias = template.id || _property.id;
+            _property.alias = template.alias || _property.alias; //ToDo: think about the implications of this.
+            _property.onChange = template.onChange || _property.onChange;
         }
 
         host.__infection__.properties[property] = _property;

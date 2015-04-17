@@ -77,9 +77,9 @@
         replacement.__infection__.original = original;
 
         //Copy function methods into __infection__
-        /*for(var prop in Object.prototype.infect.func) {
+        for(var prop in Object.prototype.infect.func) {
             replacement.__infection__[prop] = Object.prototype.infect.func[prop];
-        }*/
+        }
 
         //Return newly wrapped function.
         return replacement;
