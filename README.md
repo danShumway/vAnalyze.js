@@ -1,3 +1,5 @@
+**vAnalyze.js should not be considered production ready.  It is possible that not everything written below will work as of time of reading.**
+
 # vAnalyze.js
 
 vAnalyze.js is an inline javascript debugger that can be manipulated during program execution from the console.  
@@ -46,3 +48,27 @@ If vAnalyze is not able to infect your object (either because it's a primitive, 
 ##What's the benefit?
 
 When vAnalyze infects your objects, it exposes useful diagnostic information about them, which can be used to aid in debugging or code analysis.
+
+###Properties
+
+Infections contain an object with of all of a Host's accessible **Properties** conveniently accessible as the ```properties``` property of that infection.
+
+By calling ```search()``` on an infection, you can get a selection of all properties on that object (and sub-objects) that match a set of passed-in filters.
+
+```javascript
+var myObject = {x:5, y:10, child:{x:12, y:15, z:null}};
+var unset = myObject.infect().search({value:null});
+```
+
+This is especially useful when leveraged against large collections of objects.
+
+```javascript
+var myArray = [];
+for(var i = 0; i < 1500; i++) {
+  myArray.push({x:Math.random()*100 - 15, y:Math.random()*100 - 15});
+}
+
+var outOfBounds = myArray.infect().search({name:'x', custom:function(p) { return p.get() < 0; }});
+```
+
+The above line of code returns all objects that have an x property less than 0.
