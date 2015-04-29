@@ -6,7 +6,6 @@ QUnit.test("Basic Wrapper", function(assert) {
         wrapped_entry = entry.infect().wrap();
 
 
-    console.log(entry);
     assert.deepEqual(typeof wrapped_entry, 'function', 'infect().wrap() returns function');
     assert.deepEqual(entry.infect().wrap(), wrapped_entry, 'calling infect().wrap() on wrapped function returns Wrapper');
     assert.deepEqual(wrapped_entry(5), 5, 'Wrapper calls original function with correct arguments and returns correct value');

@@ -10,3 +10,13 @@ QUnit.test("Chaining", function(assert) {
 
     assert.deepEqual(infection.__proto__, obj.infect, 'Infection inherits prototype from .infect');
 });
+
+QUnit.test("Arrays", function(assert) {
+    var myArray = [{x:5}, {x:6}],
+        infection = myArray.infect();
+
+    window.myArray = myArray;
+
+    assert.ok(myArray.__infection__, "Arrays can be infected");
+    assert.ok(myArray[0].__infection__, "Elements of an array will be infected.")
+});

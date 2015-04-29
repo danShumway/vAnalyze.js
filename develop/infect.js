@@ -17,29 +17,11 @@
     Infection.prototype = infect;
     function Infection(that, dummy) {
         this.that = that; //Proper chaining.
-        this.dummy = dummy; //Is it a fake infection?
+        this.dummy = dummy || false; //Is it a fake infection?
 
 
         this.properties = {};
         this.__ignore__ =  true;
-    }
-
-    /**
-     * Builds and adds infection properties to an object.
-     * @returns bool - true or false based on whether or not the infection was successful.
-     **/
-    function buildInfection(that) {
-        var __infection__;
-
-
-        if(!that) { return false; } //Base case.
-
-        __infection__ = new Infection(that);
-
-        //We use defineProperty to keep our addition from being enumerated on in existing code.
-        Object.defineProperty(that, '__infection__', { value : __infection__, enumerable: false});
-
-        return true;
     }
 
     /**
@@ -50,21 +32,61 @@
      *
      **/
     var globalIgnore = { //ToDo: this should be abstracted someplace better.
-        toString : true
+        properties: {
+            toString: true
+        },
+        constructors: [
+            Number,
+            String,
+            Boolean
+        ]
     };
 
-    function infect() {
-        if (!this.__ignore__ && Object.isExtensible(this)) {
+    /**
+     * Builds and adds infection properties to an object.
+     * @returns Infection - true or false based on whether or not the infection was successful.
+     **/
+    function buildInfection(that) {
+        var __infection__;
 
-            if (!this.__infection__) {
-                buildInfection(this);
-            } else {
-                //Return the infection (for method chaining).
-                return this.__infection__;
-            }
 
+        //Dummy infections.
+        if(that == undefined ||
+            that == null ||
+            !Object.isExtensible(that) ||
+            that.__ignore__) {
+            return new Infection(that, true);
+        }
+
+        //Proper primitive exposure.
+        if(that instanceof Number || that instanceof String || that instanceof Boolean) {
+            return new Infection(that.valueOf(), true);
+        }
+
+        //Otherwise, continue.
+        __infection__ = new Infection(that);
+        //We use defineProperty to keep our addition from being enumerated on in existing code.
+        Object.defineProperty(that, '__infection__', { value : __infection__, enumerable: false});
+        return __infection__;
+    }
+
+    /**
+     *
+     * @param options
+     * @returns {Infection}
+     */
+    function infect(options) {
+        var infection;
+
+        if (!this.__infection__) {
+            infection = buildInfection(this);
+        } else {
+            return this.__infection__; //For method chaining.
+        }
+
+        if(!infection.dummy) {
             for (var p in this) {
-                if (!globalIgnore[p]) {
+                if (!globalIgnore.properties[p]) {
                     var properHost = this;
                     if (!this.hasOwnProperty(p)) {
                         properHost = getOrigin(this.__proto__, p);
@@ -73,12 +95,9 @@
                     properHost.infect().prop(p);
                 }
             }
-
-            return this.__infection__;
         }
 
-        //@Huh: this should fail silently.  Maybe return some sort of default infection object that doesn't do anything?
-        return new Infection(this, true);
+        return infection;
     }
 
 
