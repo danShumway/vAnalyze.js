@@ -1,5 +1,6 @@
 **vAnalyze.js should not be considered production ready.  It is possible that not everything written below will work as of time of reading.**
 
+[![Build Status](https://travis-ci.org/danShumway/vAnalyze.js.svg?branch=master)](https://travis-ci.org/danShumway/vAnalyze.js)
 # vAnalyze.js
 
 vAnalyze.js is an inline javascript debugger that can be manipulated during program execution from the console.  
