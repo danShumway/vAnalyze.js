@@ -1,0 +1,152 @@
+{
+    "project": {
+        "name": "vAnalyze.js",
+        "description": "Middleware debugging and runtime analysis",
+        "version": "0.0.1",
+        "url": ""
+    },
+    "files": {
+        "develop\\base\\property.js": {
+            "name": "develop\\base\\property.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "develop\\base\\search.js": {
+            "name": "develop\\base\\search.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "develop\\property\\get.js": {
+            "name": "develop\\property\\get.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "develop\\infect.js": {
+            "name": "develop\\infect.js",
+            "modules": {
+                "vAnalyze": 1
+            },
+            "classes": {
+                "Infection": 1,
+                "Object": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {
+        "vAnalyze": {
+            "name": "vAnalyze",
+            "submodules": {},
+            "classes": {
+                "Infection": 1,
+                "Object": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "develop\\infect.js",
+            "line": 1,
+            "description": "Real-time code analysis and debugging, accessible both within code and from the console."
+        }
+    },
+    "classes": {
+        "Infection": {
+            "name": "Infection",
+            "shortname": "Infection",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "vAnalyze",
+            "file": "develop\\infect.js",
+            "line": 115,
+            "description": "Object returned from calling ```infect``` on a Host.\nServes as the base for most other vAnalyze functionality.\n\nExample creation:\n```javascript\nvar myObj = {x:5, y:[10, 12]};\nvar infection = myObj.infect();\n```\n\nBecause ```infect``` can be called safely on already infected objects,\nthis type of storage will in practice be largely unecessary."
+        },
+        "Object": {
+            "name": "Object",
+            "shortname": "Object",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "vAnalyze",
+            "namespace": "",
+            "file": "develop\\infect.js",
+            "line": 1,
+            "description": "Real-time code analysis and debugging, accessible both within code and from the console."
+        }
+    },
+    "classitems": [
+        {
+            "file": "develop\\base\\search.js",
+            "line": 43,
+            "description": "Looks through an object to see if it can find a property on it or any of its children.",
+            "itemtype": "method",
+            "name": "search",
+            "params": [
+                {
+                    "name": "searchObject",
+                    "description": "- Filter for the search. Available properties are:\n - Name: String"
+                }
+            ],
+            "return": {
+                "description": "A selection of results that match the provided filter",
+                "type": "Array"
+            },
+            "class": "Infection"
+        },
+        {
+            "file": "develop\\property\\get.js",
+            "line": 3,
+            "description": "Returns a property object based on the given name.\nIf there are more than one properties with the name... there can't be more than one property with the given name.\nDefining two properties with the same name overwrites the first one.\n\nIf there is no property with that name, returns a blank object?\n\n{\n     value: currentValue,\n     history: [array of past values],\n     stack: [not sure how this ought to work],\n     set: _property.set(value)\n}",
+            "example": [
+                ":\n\nvar myObj = {x: 5, y:5},\n    x = myObj.infect().get('x').value; //5\n"
+            ],
+            "class": "Object"
+        },
+        {
+            "file": "develop\\infect.js",
+            "line": 78,
+            "description": "vAnalyze entry point, attached to Object.prototype.\nCall to turn any object into a Host and return that Host's Infection\nCan be called multiple times on already infected objects without side-effects.\nCan be called on primitive types.",
+            "itemtype": "method",
+            "name": "infect",
+            "params": [
+                {
+                    "name": "options:",
+                    "description": "An object with options about how infections should be created."
+                }
+            ],
+            "return": {
+                "description": "Infection - An object with properties about the Host"
+            },
+            "todo": [
+                ": flesh out options."
+            ],
+            "class": "Object",
+            "module": "vAnalyze"
+        }
+    ],
+    "warnings": [
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " develop\\base\\search.js:43"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " develop\\infect.js:78"
+        },
+        {
+            "message": "Missing item type\nReturns a property object based on the given name.\nIf there are more than one properties with the name... there can't be more than one property with the given name.\nDefining two properties with the same name overwrites the first one.\n\nIf there is no property with that name, returns a blank object?\n\n{\n     value: currentValue,\n     history: [array of past values],\n     stack: [not sure how this ought to work],\n     set: _property.set(value)\n}",
+            "line": " develop\\property\\get.js:3"
+        }
+    ]
+}

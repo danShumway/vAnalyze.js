@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>develop\base\search.js - vAnalyze.js</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="vAnalyze.js" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                            <li><a href="#api-methods">Methods</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/Infection.html">Infection</a></li>
+                                <li><a href="../classes/Object.html">Object</a></li>
+                            </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/vAnalyze.html">vAnalyze</a></li>
+                            </ul>
+                
+                            <ul id="api-methods" class="apis methods">
+                                    <li><a href="../classes/Infection.html">Infection</a></li>
+                                    <li><a href="../classes/Object.html">Object</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: develop\base\search.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @class Infection
+ */
+(function() {
+
+    var filters = {
+        name: function(prop, filter) {
+            return prop.name === filter;
+        },
+
+        names: function(prop, filter) {
+            return filter.indexOf(prop.name) !== -1;
+        },
+
+        value: function(prop, filter) {
+            return prop.get() === filter;
+        },
+
+        values: function(prop, filter) {
+            var value = prop.get();
+            return filter.indexOf(value) !== -1;
+        },
+
+        custom: function(prop, filter) {
+            return filter(prop);
+        }
+    };
+
+    function match(prop, searchObject) {
+        var add = true;
+
+        if(!searchObject) { return true; }
+
+        Object.keys(searchObject).forEach( function(key) {
+            if(filters[key]) {
+                add = add &amp;&amp; filters[key](prop, searchObject[key]);
+            }
+        });
+
+        return add;
+    }
+
+    /**
+     * Looks through an object to see if it can find a property on it or any of its children.
+     *
+     * @method search
+     * @param searchObject - Filter for the search. Available properties are:
+     *  - Name: String
+     * @returns {Array} A selection of results that match the provided filter
+     */
+    function search(searchObject) {
+        //By default, they return everything.
+        //Stuff is filtered out as we go.
+        var that = this.that,
+            next,
+            toReturn = [];
+
+        for (var prop in this.properties) {
+            if(this.properties.hasOwnProperty(prop)) {
+                //Loop through search object and see if object applies.
+                //ToDo: filter these out into rules or something.
+                if (match(this.properties[prop], searchObject)) {
+                    toReturn.push(this.properties[prop]);
+                }
+
+                //If the property is infected, recurse.
+                next = this.properties[prop].get().infect();
+                if (next) {
+                    toReturn = toReturn.concat(next.search(searchObject));
+                    //toReturn.concat(search.call(this.properties[prop].get().__infection__, searchObject));
+                }
+            }
+        }
+
+        return toReturn;
+    }
+
+
+    //---------------------Attach--------------------
+    Object.defineProperty(Object.prototype.infect.__proto__, &#x27;search&#x27;, {value: search, enumerable:false });
+    Object.defineProperty(Object.prototype.infect.__proto__.search, &#x27;__ignore__&#x27;, {value: true, enumerable:false });
+})();
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

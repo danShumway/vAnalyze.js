@@ -1,6 +1,11 @@
+/**
+ * Real-time code analysis and debugging, accessible both within code and from the console.
+ *
+ * @module vAnalyze
+ * @class Object
+ */
 (function() {
-
-    /**
+    /*
      * Recursively get prototype that a property is attached to.
      * @returns the prototype that actually owns the method being called.
      **/
@@ -24,7 +29,7 @@
         this.__ignore__ =  true;
     }
 
-    /**
+    /*
      * Loop through any created object and get all methods attached to it.
      * If I run into an attached property (through a prototype) that I've already seen or stored elsewhere,
      * that should be a dead giveaway that the 'elsewhere' is a prototype of this object.
@@ -42,7 +47,7 @@
         ]
     };
 
-    /**
+    /*
      * Builds and adds infection properties to an object.
      * @returns Infection - true or false based on whether or not the infection was successful.
      **/
@@ -51,8 +56,8 @@
 
 
         //Dummy infections.
-        if(that == undefined ||
-            that == null ||
+        if(that === undefined ||
+            that === null ||
             !Object.isExtensible(that) ||
             that.__ignore__) {
             return new Infection(that, true);
@@ -71,9 +76,15 @@
     }
 
     /**
+     * vAnalyze entry point, attached to Object.prototype.
+     * Call to turn any object into a Host and return that Host's Infection
+     * Can be called multiple times on already infected objects without side-effects.
+     * Can be called on primitive types.
      *
-     * @param options
-     * @returns {Infection}
+     * @method infect
+     * @param options: An object with options about how infections should be created.
+     * @returns Infection - An object with properties about the Host
+     * @todo: flesh out options.
      */
     function infect(options) {
         var infection;
@@ -91,12 +102,31 @@
                     if (!this.hasOwnProperty(p)) {
                         properHost = getOrigin(this.__proto__, p);
                     }
-                    properHost[p] = properHost[p].infect().wrap();
+
+                    //Don't die on null/undefined.
+                    if(properHost[p] !== null && properHost[p] !== undefined) {
+                        properHost[p] = properHost[p].infect().wrap();
+                    }
                     properHost.infect().prop(p);
                 }
             }
         }
 
+        /**
+         * Object returned from calling ```infect``` on a Host.
+         * Serves as the base for most other vAnalyze functionality.
+         *
+         * Example creation:
+         * ```javascript
+         * var myObj = {x:5, y:[10, 12]};
+         * var infection = myObj.infect();
+         * ```
+         *
+         * Because ```infect``` can be called safely on already infected objects,
+         * this type of storage will in practice be largely unecessary.
+         *
+         * @class Infection
+         */
         return infection;
     }
 

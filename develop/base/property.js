@@ -1,6 +1,9 @@
+/**
+ * @class Infection
+ */
 (function() {
 
-    /**
+    /*
      * @param property - name of the property
      * @param template (optional) - object that specifies custom getter or setter.
      */

@@ -1,3 +1,6 @@
+/**
+ * @class Infection
+ */
 (function() {
 
     var filters = {
@@ -39,8 +42,11 @@
 
     /**
      * Looks through an object to see if it can find a property on it or any of its children.
-     * @param searchObject
-     * @returns {Array} - a selection of results.
+     *
+     * @method search
+     * @param searchObject - Filter for the search. Available properties are:
+     *  - Name: String
+     * @returns {Array} A selection of results that match the provided filter
      */
     function search(searchObject) {
         //By default, they return everything.
