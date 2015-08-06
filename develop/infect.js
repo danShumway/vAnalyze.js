@@ -157,8 +157,6 @@
     function infect(obj, options) {
         var that = this,
             infection,
-            properHost,
-            p;
 
         //Support for calling target.infect()
         //May be removed in the future.
@@ -173,12 +171,20 @@
         } //Else continue
 
         //Loop through all properties on the object and infect them first.
-        for (p in obj) {
+        for (let p in obj) {
             //Don't die on null or undefined;
             //Also, are we still doing globalIgnores?  We should maybe get rid of them.
             if (!globalIgnore.properties[p] && obj[p] != null) {
+                let origin = getOrigin(obj, p);
+
                 //Infect properties and set them at the correct prototype level.
-                getOrigin(obj, p)[p] = infect(obj[p]);
+                //Only proceed if property is settable.
+                //TODO: should those properties still be infected?
+                  //They won't be able to be set, but there's still value in having *a* proxy-wrapped version.
+                  //At the least they'll still be logged and I could watch them a little bit if others wanted to try and infect.
+                if (Object.getOwnPropertyDescriptor(origin, p).writable) {
+                  origin[p] = infect(origin[p]);
+                }
             }
         }
 
